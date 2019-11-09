@@ -19,6 +19,7 @@ local force = CreateConVar("csniper_bullet_force", 2500, {FCVAR_ARCHIVE, FCVAR_R
 
 function ENT:Initialize()
 	self:DrawShadow(false)
+	self.LastThink = CurTime()
 
 	local pos = self:GetPos()
 
@@ -42,7 +43,6 @@ function ENT:Initialize()
 		local time = (pos - tr.HitPos):Length() / speed:GetFloat()
 
 		self.SoundTime = CurTime() + (time * 0.5)
-		self.LastThink = CurTime()
 
 		self.Impacts = 0
 		self.Filter = {}
@@ -157,6 +157,28 @@ if SERVER then
 end
 
 if CLIENT then
+	function ENT:Think()
+		self:SetNextClientThink(CurTime())
+
+		if not self.WhizDone then
+			local delta = CurTime() - self.LastThink
+
+			self.LastThink = CurTime()
+
+			local pos = self:GetPos()
+			local dist, point = util.DistanceToLine(pos, pos + (self:GetAngles():Forward() * (delta * speed:GetFloat())), EyePos())
+
+			if dist >= 72 then
+				return true
+			end
+
+			sound.Play("Bullets.StriderNearmiss", point)
+
+			self.WhizDone = true
+		end
+
+		return true
+	end
 	local beam = Material("effects/gunshiptracer")
 	local sprite = Material("sprites/orangeflare1")
 
