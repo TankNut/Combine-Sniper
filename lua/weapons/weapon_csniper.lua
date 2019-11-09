@@ -59,14 +59,16 @@ function SWEP:Deploy()
 end
 
 function SWEP:Holster()
-	self.Owner:SetFOV(0, 0.2)
+	if self:GetInZoom() then
+		self:ToggleZoom()
+	end
 
 	return true
 end
 
 function SWEP:OnRemove()
-	if IsValid(self.Owner) then
-		self.Owner:SetFOV(0, 0.2)
+	if IsValid(self.Owner) and self:GetInZoom() then
+		self:ToggleZoom()
 	end
 end
 
