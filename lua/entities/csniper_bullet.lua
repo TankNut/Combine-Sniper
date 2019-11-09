@@ -62,7 +62,34 @@ if SERVER then
 		self:SetPos(pos)
 		self:SetStopped(CurTime())
 
+		if self.SoundTime != -1 then
+			self:SonicBoom()
+		end
+
 		SafeRemoveEntityDelayed(self, 1)
+	end
+
+	function ENT:SonicBoom()
+		local pos = self:GetPos()
+
+		self:EmitSound("NPC_Sniper.SonicBoom")
+
+		local owner = self:GetOwner()
+		local start = self:GetStartPos()
+
+		if IsValid(owner) then
+			for _, v in pairs(ents.GetAll()) do
+				if not IsValid(v) or not v:IsNPC() then
+					continue
+				end
+
+				if v:VisibleVec(pos) then
+					v:UpdateEnemyMemory(owner, start)
+				end
+			end
+		end
+
+		self.SoundTime = -1
 	end
 
 	function ENT:Think()
@@ -73,24 +100,7 @@ if SERVER then
 		local pos = self:GetPos()
 
 		if self.SoundTime != -1 and CurTime() >= self.SoundTime then
-			self:EmitSound("NPC_Sniper.SonicBoom")
-
-			local owner = self:GetOwner()
-			local start = self:GetStartPos()
-
-			if IsValid(owner) then
-				for _, v in pairs(ents.GetAll()) do
-					if not IsValid(v) or not v:IsNPC() then
-						continue
-					end
-
-					if v:VisibleVec(pos) then
-						v:UpdateEnemyMemory(owner, start)
-					end
-				end
-			end
-
-			self.SoundTime = -1
+			self:SonicBoom()
 		end
 
 		local delta = CurTime() - self.LastThink
