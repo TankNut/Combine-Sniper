@@ -5,6 +5,7 @@
 	"ignore":
 	[
 		"*.bat",
+		"*.jpg",
 		"*.md",
 		".git*",
 		"LICENSE"
