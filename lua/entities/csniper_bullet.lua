@@ -126,7 +126,7 @@ if SERVER then
 
 			self.Impacts = self.Impacts + 1
 
-			if self.Impacts == self.MaxPenetrations or (IsValid(ent) and (ent:IsNPC() or ent:IsPlayer())) then
+			if self.Impacts == self.MaxPenetrations or (IsValid(ent) and (ent:IsNPC() or ent:IsPlayer())) or tr.HitTexture == "**displacement**" then
 				ent:ForcePlayerDrop()
 
 				self:Stop(tr.HitPos)
