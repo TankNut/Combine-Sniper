@@ -1,0 +1,12 @@
+{
+	"title": "Combine Sniper",
+	"type":	"weapon",
+	"tags":	["fun", "roleplay"],
+	"ignore":
+	[
+		"*.bat",
+		"*.md",
+		".git*",
+		"LICENSE"
+	]
+}

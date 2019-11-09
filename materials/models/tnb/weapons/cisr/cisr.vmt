@@ -1,0 +1,12 @@
+"VertexLitGeneric"
+{
+	"$basetexture"				"models/tnb/weapons/cisr/cisr"
+	"$bumpmap"					"models/tnb/weapons/cisr/cisr_normal"
+	"$model" 					"1"
+	
+	"$phong" 					"1"
+	"$phongboost" 				"2"
+	"$phongexponenttexture" 	"models/tnb/weapons/cisr/cisr_normal"
+	"$phongalbedotint" 			"1"								
+	"$phongfresnelranges"		"[.5 1 2]"
+}
