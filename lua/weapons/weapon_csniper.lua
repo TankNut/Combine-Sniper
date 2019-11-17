@@ -270,6 +270,10 @@ if CLIENT then
 	function SWEP:PostDrawTranslucentRenderables()
 		local ply = self.Owner
 
+		if not IsValid(ply) then
+			return
+		end
+
 		if ply == LocalPlayer() and LocalPlayer():GetViewEntity() == LocalPlayer() and not hook.Run("ShouldDrawLocalPlayer", ply) then
 			return
 		end
