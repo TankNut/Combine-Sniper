@@ -1,5 +1,15 @@
 AddCSLuaFile()
 
+local ttt = engine.ActiveGamemode() == "terrortown"
+
+if ttt then
+	if SERVER then
+		resource.AddFile("materials/vgui/ttt/icon_csniper.vmt")
+	end
+
+	SWEP.Base = "weapon_tttbase"
+end
+
 SWEP.PrintName 				= "Combine Sniper"
 SWEP.Author 				= "TankNut"
 
@@ -32,6 +42,27 @@ SWEP.Secondary.Ammo 		= ""
 SWEP.Secondary.Automatic 	= false
 
 SWEP.HoldType 				= "ar2"
+
+if ttt then
+	SWEP.ViewModelFlip = false
+	SWEP.Slot = 2
+
+	SWEP.Primary.Ammo = "357"
+
+	SWEP.Kind = WEAPON_HEAVY
+	SWEP.AmmoEnt = "item_ammo_357_ttt"
+
+	SWEP.Icon = "vgui/ttt/icon_csniper"
+	SWEP.CanBuy = {ROLE_TRAITOR, ROLE_DETECTIVE}
+
+	SWEP.EquipMenuData = {
+		type = "Weapon",
+		desc = "A powerful combine sniper that requires\nthe user to manually lead their target"
+	}
+
+	SWEP.AllowDrop = true
+	SWEP.NoSights = true
+end
 
 local allow_lead = CreateConVar("csniper_lead_indicator", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Whether or not players can use lead indicators")
 local infinite_ammo = CreateConVar("csniper_infinite_ammo", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Gives the combine sniper infinite ammo")
