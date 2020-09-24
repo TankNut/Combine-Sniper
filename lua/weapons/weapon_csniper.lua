@@ -98,7 +98,7 @@ function SWEP:Holster()
 end
 
 function SWEP:OnRemove()
-	if IsValid(self.Owner) and self:GetInZoom() then
+	if IsValid(self:GetOwner()) and self:GetInZoom() then
 		self:ToggleZoom()
 	end
 end
@@ -114,7 +114,7 @@ function SWEP:PrimaryAttack()
 		return
 	end
 
-	local ply = self.Owner
+	local ply = self:GetOwner()
 
 	ply:SetAnimation(PLAYER_ATTACK1)
 	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
@@ -147,7 +147,7 @@ function SWEP:Reload()
 		return
 	end
 
-	local ply = self.Owner
+	local ply = self:GetOwner()
 
 	if ply:IsPlayer() and not infinite_ammo:GetBool() then
 		local ammo = ply:GetAmmoCount(self.Primary.Ammo)
@@ -157,7 +157,7 @@ function SWEP:Reload()
 		end
 	end
 
-	self.Owner:SetAnimation(PLAYER_RELOAD)
+	self:GetOwner():SetAnimation(PLAYER_RELOAD)
 
 	self:EmitSound("NPC_Sniper.Reload")
 
@@ -166,21 +166,23 @@ function SWEP:Reload()
 end
 
 function SWEP:Think()
+	local ply = self:GetOwner()
+
 	if self:GetInReload() and CurTime() > self:GetNextPrimaryFire() then
 		self:SetInReload(false)
 
-		local amt = math.min(self.Owner:GetAmmoCount(self.Primary.Ammo), self.Primary.ClipSize)
+		local amt = math.min(ply:GetAmmoCount(self.Primary.Ammo), self.Primary.ClipSize)
 
 		self:SetClip1(amt)
 
 		if not infinite_ammo:GetBool() then
-			self.Owner:RemoveAmmo(amt, self.Primary.Ammo)
+			ply:RemoveAmmo(amt, self.Primary.Ammo)
 		end
 	end
 end
 
 function SWEP:ToggleZoom()
-	local ply = self.Owner
+	local ply = self:GetOwner()
 
 	if self:GetInZoom() then
 		ply:SetFOV(0, 0.2)
@@ -194,25 +196,25 @@ function SWEP:ToggleZoom()
 end
 
 function SWEP:GetAimDir()
-	local ply = self.Owner
+	local ply = self:GetOwner()
 
 	return ply:GetAimVector():Angle() + ply:GetViewPunchAngles()
 end
 
 function SWEP:GetAimTrace()
-	local ply = self.Owner
+	local ply = self:GetOwner()
 
 	return util.TraceLine({
 		start = ply:GetShootPos(),
 		endpos = ply:GetShootPos() + (self:GetAimDir():Forward() * 8192),
-		filter = {self.Owner, self},
+		filter = {ply, self},
 		mask = MASK_SHOT
 	})
 end
 
 function SWEP:GetTimeToTarget(pos)
 	local speed = GetConVar("csniper_bullet_speed"):GetFloat()
-	local dist = (pos - self.Owner:GetShootPos()):Length()
+	local dist = (pos - self:GetOwner():GetShootPos()):Length()
 
 	return dist / speed
 end
@@ -249,7 +251,7 @@ if CLIENT then
 				continue
 			end
 
-			if target == self.Owner or target:Health() <= 0 then
+			if target == self:GetOwner() or target:Health() <= 0 then
 				continue
 			end
 
@@ -263,11 +265,11 @@ if CLIENT then
 				continue
 			end
 
-			local ttt = self:GetTimeToTarget(tpos)
+			local time = self:GetTimeToTarget(tpos)
 
 			self.LeadVelocity[target] = LerpVector(FrameTime(), self.LeadVelocity[target] or Vector(), target:GetVelocity())
 
-			local lead = (tpos + (target:GetVelocity() * ttt)):ToScreen()
+			local lead = (tpos + (target:GetVelocity() * time)):ToScreen()
 			local tpos2 = tpos:ToScreen()
 
 			local w = lead_size:GetInt()
@@ -299,7 +301,7 @@ if CLIENT then
 	end
 
 	function SWEP:PostDrawTranslucentRenderables()
-		local ply = self.Owner
+		local ply = self:GetOwner()
 
 		if not IsValid(ply) then
 			return
