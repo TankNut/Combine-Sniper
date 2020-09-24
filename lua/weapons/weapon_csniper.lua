@@ -66,6 +66,7 @@ end
 
 local allow_lead = CreateConVar("csniper_lead_indicator", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Whether or not players can use lead indicators")
 local infinite_ammo = CreateConVar("csniper_infinite_ammo", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Gives the combine sniper infinite ammo")
+local zoom = CreateConVar("csniper_scope_zoom", 5, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "How much zoom to apply")
 
 function SWEP:Initialize()
 	self:SetHoldType(self.HoldType)
@@ -189,7 +190,7 @@ function SWEP:ToggleZoom()
 
 		self:SetInZoom(false)
 	else
-		ply:SetFOV(self.ZoomFOV, 0.1)
+		ply:SetFOV(ply:GetInfoNum("fov_desired", 75) / zoom:GetFloat(), 0.2)
 
 		self:SetInZoom(true)
 	end
@@ -287,17 +288,27 @@ if CLIENT then
 	end
 
 	function SWEP:PreDrawViewModel(vm, wep, ply)
-		self.ViewModelFOV = math.Remap(ply:GetFOV(), fov:GetFloat(), self.ZoomFOV, self.ViewFOV, fov:GetFloat())
+		self.ViewModelFOV = 54 + (fov:GetFloat() - ply:GetFOV()) * 0.6
 
 		if self:ShouldDrawBeam() then
-			local pos = vm:GetAttachment(1).Pos
-			local tr = self:GetAimTrace()
+			cam.Start3D(nil, nil, ply:GetFOV())
+				cam.IgnoreZ(true)
 
-			render.SetMaterial(beam)
-			render.DrawBeam(pos, tr.HitPos, 1, 0, tr.Fraction * 10, Color(255, 0, 0))
-			render.SetMaterial(sprite)
-			render.DrawSprite(tr.HitPos, 2, 2, Color(50, 190, 255))
+				local pos = vm:GetAttachment(1).Pos
+				local tr = self:GetAimTrace()
+
+				render.SetMaterial(beam)
+				render.DrawBeam(pos, tr.HitPos, 1, 0, tr.Fraction * 10, Color(255, 0, 0))
+				render.SetMaterial(sprite)
+				render.DrawSprite(tr.HitPos, 2, 2, Color(50, 190, 255))
+			cam.End3D()
 		end
+
+		cam.IgnoreZ(true)
+	end
+
+	function SWEP:PostDrawViewModel(vm, wep, ply)
+		cam.IgnoreZ(false)
 	end
 
 	function SWEP:PostDrawTranslucentRenderables()
