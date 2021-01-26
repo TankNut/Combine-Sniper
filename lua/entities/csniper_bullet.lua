@@ -6,15 +6,13 @@ ENT.Author 					= "TankNut"
 
 ENT.RenderGroup 			= RENDERGROUP_TRANSLUCENT
 
-ENT.StepSize 				= 2
-ENT.MaxSteps 				= 6
-
-ENT.MaxPenetrations 		= 3
-ENT.MaxPenetrationDepth 	= 5
-
 local speed = CreateConVar("csniper_bullet_speed", 6000, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "How quickly the sniper's bullet flies")
 local damage = CreateConVar("csniper_bullet_damage", 100, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "How much damage each bullet does")
 local force = CreateConVar("csniper_bullet_force", 2500, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "The amount of force applied to everything the bullet passes through")
+
+local pen_max = CreateConVar("csniper_bullet_pen_max", 3, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "How many times each bullet can penetrate a surface")
+local pen_depth = CreateConVar("csniper_bullet_pen_depth", 12, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "How thick of a wall bullets can penetrate")
+local pen_steps = CreateConVar("csniper_bullet_pen_steps", 6, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "The amount of steps each bullet takes when trying to penetrate a surface, more steps results in better accuracy but decreases performance", 1)
 
 function ENT:Initialize()
 	self:DrawShadow(false)
@@ -135,7 +133,7 @@ if SERVER then
 
 			self.Impacts = self.Impacts + 1
 
-			if self.Impacts == self.MaxPenetrations or (IsValid(ent) and (ent:IsNPC() or ent:IsPlayer())) or tr.HitTexture == "**displacement**" then
+			if self.Impacts >= pen_max:GetInt() or (IsValid(ent) and (ent:IsNPC() or ent:IsPlayer())) or tr.HitTexture == "**displacement**" then
 				ent:ForcePlayerDrop()
 
 				self:Stop(tr.HitPos)
@@ -145,8 +143,8 @@ if SERVER then
 
 			local cursor = tr.HitPos
 
-			for i = 1, self.MaxSteps do
-				cursor = cursor + (dir * self.StepSize)
+			for i = 1, pen_steps:GetInt() do
+				cursor = cursor + (dir * (pen_depth:GetFloat() / pen_steps:GetInt()))
 
 				if bit.band(util.PointContents(cursor), CONTENTS_SOLID) == 0 then
 					self:SetPos(cursor)
