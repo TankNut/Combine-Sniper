@@ -26,9 +26,6 @@ SWEP.DrawCrosshair 			= false
 SWEP.ViewModel 				= Model("models/tnb/weapons/c_cisr.mdl")
 SWEP.WorldModel 			= Model("models/tnb/weapons/w_cisr.mdl")
 
-SWEP.ViewFOV 				= 54
-SWEP.ZoomFOV 				= 20
-
 SWEP.UseHands 				= true
 
 SWEP.Primary.ClipSize 		= 1
@@ -67,6 +64,7 @@ end
 local allow_lead = CreateConVar("csniper_lead_indicator", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Whether or not players can use lead indicators")
 local infinite_ammo = CreateConVar("csniper_infinite_ammo", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Gives the combine sniper infinite ammo")
 local zoom = CreateConVar("csniper_scope_zoom", 5, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "How much zoom to apply")
+local require_scope = CreateConVar("csniper_require_scope", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Whether you can fire without scoping in")
 
 function SWEP:Initialize()
 	self:SetHoldType(self.HoldType)
@@ -106,6 +104,12 @@ end
 
 function SWEP:PrimaryAttack()
 	if self:GetInReload() or not self:CanPrimaryAttack() then
+		return
+	end
+
+	if require_scope:GetBool() and not self:GetInZoom() then
+		self:EmitSound("HL2Player.UseDeny")
+
 		return
 	end
 
